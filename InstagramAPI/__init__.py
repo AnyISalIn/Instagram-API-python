@@ -597,8 +597,21 @@ class InstagramAPI:
         return self.SendRequest('media/'+ str(mediaId) +'/comment/'+ str(commentId) +'/delete/', self.generateSignature(data))
 
     def changeProfilePicture(self, photo):
-        # TODO Instagram.php 705-775
-        return False
+        data = {
+        '_uuid'             : self.uuid,
+        '_csrftoken'        : self.token,
+        'profile_pic'       : ('profile_pic.jpg', open(photo, 'rb'), 'application/octet-stream', {'Content-Transfer-Encoding':'binary'})
+        }
+        m = MultipartEncoder(data, boundary=self.uuid)
+        self.s.headers.update ({'X-IG-Capabilities' : '3Q4=',
+                                'X-IG-Connection-Type' : 'WIFI',
+                                'Cookie2' : '$Version=1',
+                                'Accept-Language' : 'en-US',
+                                'Accept-Encoding' : 'gzip, deflate',
+                                'Content-type': m.content_type,
+                                'Connection' : 'close',
+                                'User-Agent' : self.USER_AGENT})
+        response = self.s.post(self.API_URL + 'accounts/change_profile_picture/', data=m.to_string())
 
     def removeProfilePicture(self):
         data = json.dumps({
